@@ -1,0 +1,14 @@
+{
+    "outputs": [
+        {
+            "type": "ventoinha",
+            "tag": "Ventoinha ",
+            "gpio": 24
+        },
+        {
+            "type": "resistor",
+            "tag": "Resistor",
+            "gpio": 23
+        }
+    ]
+}
