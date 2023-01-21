@@ -14,17 +14,30 @@ comandos = {
     "temperatura_interna": b'\x01\x23\xc1\x08\x06\x08\x05',
     "temperatura_referencia": b'\x01\x23\xc2\x08\x06\x08\x05',
     "comandos_dashboard": b'\x01\x23\xc3\x08\x06\x08\x05',
+    "atualizar_estado_do_sistema_on": b'\x01\x16\xd3\x08\x06\x08\x05\x01',
+    "atualizar_estado_do_sistema_off": b'\x01\x16\xd3\x08\x06\x08\x05\x00',
+    "iniciar_aquecimento": b'\x01\x16\xd5\x08\x06\x08\x05\x01',
+    "parar_aquecimento": b'\x01\x16\xd5\x08\x06\x08\x05\x00',
 }
 
 dashboard = [
     {
-        "comando": "Ligar Forno",
+        "funcionalidade": "Ligar Forno",
         "codigo": "0xa1"
     },
-    
+    {
+        "funcionalidade": "Desligar Forno",
+        "codigo": "0xa2"
+    },
+    {
+        "funcionalidade": "Iniciar Aquecimento",
+        "codigo": "0xa3"
+    },
+    {
+        "funcionalidade": "Parar Aquecimento",
+        "codigo": "0xa4"
+    },
 ]
-
-
 
 def handleGetCRC16(comando, tamanho):
     crc_res = calcula_CRC(comando, tamanho).to_bytes(2,'little')
@@ -36,34 +49,44 @@ def handleVerifyCRC16(tamanho_uart, tamanho_crc):
     if crc_res == uart_res[-2:]:
         return uart_res
 
+def handleTemperature(comando_atual):
+    crc = handleGetCRC16(comando_atual, 7)
+    uart.write(comando_atual + crc)
+    temperatura_verificada = handleVerifyCRC16(9, 7)
+    temperatura_tratada = struct.unpack("f",temperatura_verificada[3:-2])
+    print(temperatura_tratada[0])
+
+def handleCommandAction(comando_atual):
+    crc = handleGetCRC16(comando_atual, 8)
+    uart.write(comando_atual + crc)
+    verifica_comando = handleVerifyCRC16(9, 7)
+
+def handleUserCommands():
+    crc = handleGetCRC16(comandos["comandos_dashboard"], 7)
+    uart.write(comandos["comandos_dashboard"] + crc)
+    comando_verificado = handleVerifyCRC16(9, 7)
+    if str(hex(comando_verificado[3])) == dashboard[0]["codigo"]:
+        print("RECEBEU COMANDO DE LIGAR FORNO")
+        handleCommandAction(comandos["atualizar_estado_do_sistema_on"])
+    if str(hex(comando_verificado[3])) == dashboard[1]["codigo"]:
+        print("RECEBEU COMANDO DE DESLIGAR FORNO")
+        handleCommandAction(comandos["atualizar_estado_do_sistema_off"])
+    if str(hex(comando_verificado[3])) == dashboard[2]["codigo"]:
+        print("RECEBEU COMANDO DE INICIAR AQUECIMENTO DO FORNO")
+        handleCommandAction(comandos["iniciar_aquecimento"])
+    if str(hex(comando_verificado[3])) == dashboard[3]["codigo"]:
+        print("RECEBEU COMANDO DE PARAR AQUECIMENTO DO FORNO")
+        handleCommandAction(comandos["parar_aquecimento"])
+
 def main():
     devices = handleGPIOConfig()
     # TEMPERATURA INTERNA
-    crc = handleGetCRC16(comandos["temperatura_interna"], 7)
-    uart.write(comandos["temperatura_interna"] + crc)
-    temperatura_interna_verificada = handleVerifyCRC16(9, 7)
-    temperatura_interna_tratada = struct.unpack("f",temperatura_interna_verificada[3:-2])
-    print(temperatura_interna_tratada[0])
-
-    # TEMPERATURA DE REFERENCIA 
-    crc = handleGetCRC16(comandos["temperatura_referencia"], 7)
-    uart.write(comandos["temperatura_referencia"] + crc)
-    temperatura_interna_verificada = handleVerifyCRC16(9, 7)
-    temperatura_interna_tratada = struct.unpack("f",temperatura_interna_verificada[3:-2])
-    print(temperatura_interna_tratada[0])
-    # LER COMANDOS DA DASHBOARD
-
-    print("dasdasdasd", dashboard[0]["codigo"])
-
+    handleTemperature(comandos["temperatura_interna"])
+    # TEMPERATURA REFERENCIAL
+    handleTemperature(comandos["temperatura_referencia"])
+    # LEITURA DE COMANDOS DA DASHBOARD
     while 1:   
-        crc = handleGetCRC16(comandos["comandos_dashboard"], 7)
-        uart.write(comandos["comandos_dashboard"] + crc)
-        temperatura_interna_verificada = handleVerifyCRC16(9, 7)
-        print("mensagem inteira", temperatura_interna_verificada)
-        print("mensagem cortada", temperatura_interna_verificada[3])
-        print("comando dashboard", dashboard[0]["codigo"])
-        print("verificacaao", str(hex(temperatura_interna_verificada[3])) == dashboard[0]["codigo"])
-
-        time.sleep(3.0)
+        handleUserCommands()
+        time.sleep(1.5)
 
 main()
