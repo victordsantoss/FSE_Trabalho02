@@ -6,6 +6,7 @@ import time
 # MÓDULOS
 from gpioConfig import handleGPIOConfig
 from crc16 import calcula_CRC
+from pid import pid_controle
 
 uart = serial.Serial("/dev/serial0")
 
@@ -18,6 +19,7 @@ comandos = {
     "atualizar_estado_do_sistema_off": b'\x01\x16\xd3\x08\x06\x08\x05\x00',
     "iniciar_aquecimento": b'\x01\x16\xd5\x08\x06\x08\x05\x01',
     "parar_aquecimento": b'\x01\x16\xd5\x08\x06\x08\x05\x00',
+    "sinal_de_controle":  b'\x01\x16\xd1\x08\x06\x08\x05',
 }
 
 dashboard = [
@@ -48,6 +50,9 @@ def handleVerifyCRC16(tamanho_uart, tamanho_crc):
     crc_res = handleGetCRC16(uart_res[:-2],tamanho_crc)
     if crc_res == uart_res[-2:]:
         return uart_res
+    else:
+        print("ELSE")
+        return uart_res
 
 def handleTemperature(comando_atual):
     crc = handleGetCRC16(comando_atual, 7)
@@ -55,6 +60,7 @@ def handleTemperature(comando_atual):
     temperatura_verificada = handleVerifyCRC16(9, 7)
     temperatura_tratada = struct.unpack("f",temperatura_verificada[3:-2])
     print(temperatura_tratada[0])
+    return temperatura_tratada[0]
 
 def handleCommandAction(comando_atual):
     crc = handleGetCRC16(comando_atual, 8)
@@ -78,15 +84,29 @@ def handleUserCommands():
         print("RECEBEU COMANDO DE PARAR AQUECIMENTO DO FORNO")
         handleCommandAction(comandos["parar_aquecimento"])
 
+def handleControlSinal(pid_result):
+    pid_result = pid_result.to_bytes(4,'little', signed = True)
+    crc = handleGetCRC16(comandos["sinal_de_controle"] + pid_result, len(comandos["sinal_de_controle"]))
+    uart.write(comandos["sinal_de_controle"] + crc)
+    comando_verificado = handleVerifyCRC16(5,3)
+    print("comando_verificado", comando_verificado)
+
 def main():
     devices = handleGPIOConfig()
     # TEMPERATURA INTERNA
-    handleTemperature(comandos["temperatura_interna"])
+    temp_interna = handleTemperature(comandos["temperatura_interna"])
     # TEMPERATURA REFERENCIAL
-    handleTemperature(comandos["temperatura_referencia"])
+    temp_referencial = handleTemperature(comandos["temperatura_referencia"])
+    print("temp referencial", temp_referencial)
     # LEITURA DE COMANDOS DA DASHBOARD
-    while 1:   
-        handleUserCommands()
-        time.sleep(1.5)
+    # while 1:   
+    #     handleUserCommands()
+    #     time.sleep(1.5)
+    
+    pid_result = pid_controle(30.0, 0.2, 400, temp_referencial)
+    print("pid_result", pid_result)
+    handleControlSinal(int(pid_result))
+
+
 
 main()
