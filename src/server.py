@@ -16,15 +16,13 @@ comandos = {
     "comandos_dashboard": b'\x01\x23\xc3\x08\x06\x08\x05',
 }
 
-# res = [
-#     {
-#         "type": "lampada",
-#         "tag": "Lâmpada 01",
-#         "gpio": devices["outputs"][0]["gpio"],
-#         "state": "ON" if GPIO.input(devices["outputs"][0]["gpio"]) == 1 else "OF"
-#     },
-
-# ]
+dashboard = [
+    {
+        "comando": "Ligar Forno",
+        "codigo": "0xa1"
+    },
+    
+]
 
 
 
@@ -55,12 +53,17 @@ def main():
     print(temperatura_interna_tratada[0])
     # LER COMANDOS DA DASHBOARD
 
+    print("dasdasdasd", dashboard[0]["codigo"])
+
     while 1:   
         crc = handleGetCRC16(comandos["comandos_dashboard"], 7)
         uart.write(comandos["comandos_dashboard"] + crc)
         temperatura_interna_verificada = handleVerifyCRC16(9, 7)
-        print("temperatura interna tratada", temperatura_interna_verificada)
-        print("temperatura interna tratada", temperatura_interna_verificada[3:4])
-        time.sleep(2.0)
+        print("mensagem inteira", temperatura_interna_verificada)
+        print("mensagem cortada", temperatura_interna_verificada[3])
+        print("comando dashboard", dashboard[0]["codigo"])
+        print("verificacaao", str(hex(temperatura_interna_verificada[3])) == dashboard[0]["codigo"])
+
+        time.sleep(3.0)
 
 main()
