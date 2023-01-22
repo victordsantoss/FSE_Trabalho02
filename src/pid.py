@@ -1,5 +1,4 @@
-def pid_controle(Kp, Ki, Kd, temperatura_referencia):
-    saida_medida = 0.0
+def pid_controle(Kp, Ki, Kd, temperatura_referencia, saida_medida):
     sinal_de_controle = 0.0
     T = 1.0;      
     erro_total = 0.0
