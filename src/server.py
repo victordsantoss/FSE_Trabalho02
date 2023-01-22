@@ -3,10 +3,12 @@ import RPi.GPIO as GPIO
 import serial
 import struct
 import time
+import datetime
 # MÓDULOS
 from gpioConfig import handleGPIOConfig
 from crc16 import calcula_CRC
 from pid import pid_controle
+from menu import initialMenu
 
 uart = serial.Serial("/dev/serial0")
 
@@ -49,10 +51,8 @@ def handleVerifyCRC16(tamanho_uart, tamanho_crc):
     uart_res = uart.read(tamanho_uart)
     crc_res = handleGetCRC16(uart_res[:-2],tamanho_crc)
     if crc_res == uart_res[-2:]:
-        print("=================== CRC CERTO")
         return uart_res
     else:
-        print("=================== CRC ERRADO")
         handleVerifyCRC16(9, 7)
 
 def handleTemperature(comando_atual):
@@ -103,13 +103,15 @@ def main():
     ventoinha_pwm = GPIO.PWM(devices["outputs"][0]["gpio"], 50)
     resistor_pwm = GPIO.PWM(devices["outputs"][1]["gpio"], 50)
     aquecimento = False
+    Kp, Ki, Kd, tr_res = initialMenu()
+    if tr_res == 2: temp_referencial = float(input("Digite o valor para a TEMPERATURA REFERENCIAL: "))
     while 1:   
         temp_interna = handleTemperature(comandos["temperatura_interna"])
-        temp_referencial = handleTemperature(comandos["temperatura_referencia"])
+        if tr_res == 1: temp_referencial = handleTemperature(comandos["temperatura_referencia"])
         aquecimento = handleUserCommands(ventoinha_pwm, resistor_pwm, aquecimento)
         if aquecimento == True:
             print("============================= LIDAR COM AQUECIMENTO =============================")
-            pid_result = pid_controle(30.0, 0.2, 400, temp_referencial, temp_interna)
+            pid_result = pid_controle(Kp, Ki, Kd, temp_referencial, temp_interna)
             if pid_result < 0:
                 ventoinha_pwm.start(pid_result * (-1))
                 resistor_pwm.stop()
