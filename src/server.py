@@ -9,6 +9,7 @@ from crc16 import calcula_CRC
 from pid import pid_controle
 
 uart = serial.Serial("/dev/serial0")
+aquecimento = False
 
 # COMANDOS
 comandos = {
@@ -49,7 +50,6 @@ def handleVerifyCRC16(tamanho_uart, tamanho_crc):
     uart_res = uart.read(tamanho_uart)
     crc_res = handleGetCRC16(uart_res[:-2],tamanho_crc)
     if crc_res == uart_res[-2:]:
-        print("UART_RES",uart_res)
         return uart_res
     else:
         handleVerifyCRC16(9, 7)
@@ -80,33 +80,39 @@ def handleUserCommands():
     if str(hex(comando_verificado[3])) == dashboard[2]["codigo"]:
         print("RECEBEU COMANDO DE INICIAR AQUECIMENTO DO FORNO")
         handleCommandAction(comandos["iniciar_aquecimento"])
+        aquecimento = True
     if str(hex(comando_verificado[3])) == dashboard[3]["codigo"]:
         print("RECEBEU COMANDO DE PARAR AQUECIMENTO DO FORNO")
         handleCommandAction(comandos["parar_aquecimento"])
+        aquecimento = False
+        ventoinha_pwm.stop()
+        resistor_pwm.stop()
 
 def handleControlSinal(pid_result):
     pid_result = pid_result.to_bytes(4,'little', signed = True)
     aux = comandos["sinal_de_controle"] + pid_result
     crc = handleGetCRC16(aux, len(aux))
     uart.write(aux + crc)
-    handleVerifyCRC16(5,3)
+    res = handleVerifyCRC16(5,3)
+    return res
 
 def main():
     devices = handleGPIOConfig()
-    # TEMPERATURA INTERNA
-    temp_interna = handleTemperature(comandos["temperatura_interna"])
-    print("temp interna", temp_interna)
-    # TEMPERATURA REFERENCIAL
-    temp_referencial = handleTemperature(comandos["temperatura_referencia"])
-    print("temp referencial", temp_referencial)
-    #LEITURA DE COMANDOS DA DASHBOARD
-    # while 1:   
-    #     handleUserCommands()
-    #     time.sleep(1.5)
-    
-    pid_result = pid_controle(30.0, 0.2, 400, temp_referencial)
-    handleControlSinal(int(pid_result))
-
-
-
+    ventoinha_pwm = GPIO.PWM(devices["outputs"][0]["gpio"], 50)
+    resistor_pwm = GPIO.PWM(devices["outputs"][1]["gpio"], 50)
+    while 1:   
+        temp_interna = handleTemperature(comandos["temperatura_interna"])
+        temp_referencial = handleTemperature(comandos["temperatura_referencia"])
+        handleUserCommands()
+        if aquecimento == True:
+            print("ENTREI CALCULAR PID")
+            pid_result = pid_controle(30.0, 0.2, 400, temp_referencial, temp_interna)
+            if pid_result < 0:
+                ventoinha_pwm.start(pid_result * (-1))
+                resistor_pwm.stop()
+            if pid_result > 0:
+                ventoinha_pwm.stop()
+                resistor_pwm.start(pid_result)
+            handleControlSinal(int(pid_result))
+        time.sleep(2.0)
 main()
