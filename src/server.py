@@ -9,7 +9,6 @@ from crc16 import calcula_CRC
 from pid import pid_controle
 
 uart = serial.Serial("/dev/serial0")
-aquecimento = False
 
 # COMANDOS
 comandos = {
@@ -50,8 +49,10 @@ def handleVerifyCRC16(tamanho_uart, tamanho_crc):
     uart_res = uart.read(tamanho_uart)
     crc_res = handleGetCRC16(uart_res[:-2],tamanho_crc)
     if crc_res == uart_res[-2:]:
+        print("=================== CRC CERTO")
         return uart_res
     else:
+        print("=================== CRC ERRADO")
         handleVerifyCRC16(9, 7)
 
 def handleTemperature(comando_atual):
@@ -59,7 +60,7 @@ def handleTemperature(comando_atual):
     uart.write(comando_atual + crc)
     temperatura_verificada = handleVerifyCRC16(9, 7)
     temperatura_tratada = struct.unpack("f",temperatura_verificada[3:-2])
-    print(temperatura_tratada[0])
+    print("TEMPERATURA ATUAL: ", temperatura_tratada[0])
     return temperatura_tratada[0]
 
 def handleCommandAction(comando_atual):
@@ -67,7 +68,8 @@ def handleCommandAction(comando_atual):
     uart.write(comando_atual + crc)
     handleVerifyCRC16(9, 7)
 
-def handleUserCommands():
+def handleUserCommands(ventoinha_pwm, resistor_pwm, aquecimento):
+    print("LEITURA DE COMANDOS DO USUÁRIO")
     crc = handleGetCRC16(comandos["comandos_dashboard"], 7)
     uart.write(comandos["comandos_dashboard"] + crc)
     comando_verificado = handleVerifyCRC16(9, 7)
@@ -79,33 +81,34 @@ def handleUserCommands():
         handleCommandAction(comandos["atualizar_estado_do_sistema_off"])
     if str(hex(comando_verificado[3])) == dashboard[2]["codigo"]:
         print("RECEBEU COMANDO DE INICIAR AQUECIMENTO DO FORNO")
-        handleCommandAction(comandos["iniciar_aquecimento"])
         aquecimento = True
+        handleCommandAction(comandos["iniciar_aquecimento"])
     if str(hex(comando_verificado[3])) == dashboard[3]["codigo"]:
         print("RECEBEU COMANDO DE PARAR AQUECIMENTO DO FORNO")
         handleCommandAction(comandos["parar_aquecimento"])
         aquecimento = False
         ventoinha_pwm.stop()
         resistor_pwm.stop()
+    return aquecimento
 
 def handleControlSinal(pid_result):
     pid_result = pid_result.to_bytes(4,'little', signed = True)
     aux = comandos["sinal_de_controle"] + pid_result
     crc = handleGetCRC16(aux, len(aux))
     uart.write(aux + crc)
-    res = handleVerifyCRC16(5,3)
-    return res
+    # handleVerifyCRC16(5,3)
 
 def main():
     devices = handleGPIOConfig()
     ventoinha_pwm = GPIO.PWM(devices["outputs"][0]["gpio"], 50)
     resistor_pwm = GPIO.PWM(devices["outputs"][1]["gpio"], 50)
+    aquecimento = False
     while 1:   
         temp_interna = handleTemperature(comandos["temperatura_interna"])
         temp_referencial = handleTemperature(comandos["temperatura_referencia"])
-        handleUserCommands()
+        aquecimento = handleUserCommands(ventoinha_pwm, resistor_pwm, aquecimento)
         if aquecimento == True:
-            print("ENTREI CALCULAR PID")
+            print("============================= LIDAR COM AQUECIMENTO =============================")
             pid_result = pid_controle(30.0, 0.2, 400, temp_referencial, temp_interna)
             if pid_result < 0:
                 ventoinha_pwm.start(pid_result * (-1))
@@ -114,5 +117,5 @@ def main():
                 ventoinha_pwm.stop()
                 resistor_pwm.start(pid_result)
             handleControlSinal(int(pid_result))
-        time.sleep(2.0)
+        time.sleep(1.0)
 main()
