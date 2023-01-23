@@ -41,19 +41,15 @@ Este trabalho foi desenvolvido usando a linguagem [Python](https://www.python.or
 
 ## Screenshots 
 #### Dashboard Inicial
-<img src="assets/img01.png" width="700px"/>
 
 #### Dashboard com forno e acionamento ligados
-<img src="assets/img02.png" width="700px"/>
+https://user-images.githubusercontent.com/52058094/214090381-f030d424-1d85-4ce7-bc3c-5ec33ddc729c.mov
 
 #### Dashboard com Curva Reflow
-<img src="assets/img02.png" width="700px"/>
 
 #### Logs recebidos no Terminal
-<img src="assets/img03.png" width="700px"/>
 
 #### Logs recebidos na Live
-<img src="assets/img04.png" width="700px"/>
 
 ## Vídeo de apresentação
 - Primeira opção: Clique [aqui](https://youtu.be/ukWc5g4RHE4) para ver no Youtube.
