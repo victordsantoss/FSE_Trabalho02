@@ -53,7 +53,13 @@ https://user-images.githubusercontent.com/52058094/214095270-94143975-dcf6-4a71-
 
 #### Logs recebidos no Terminal
 
+
+https://user-images.githubusercontent.com/52058094/214097258-e3ce7a11-049d-402f-8434-1911f06609db.mov
+
+
 #### Logs recebidos na Live
+
+https://user-images.githubusercontent.com/52058094/214097365-93c80656-db8d-42a5-a8da-0a2c1bff746f.mov
 
 ## Vídeo de apresentação
 - Primeira opção: Clique [aqui](https://youtu.be/ukWc5g4RHE4) para ver no Youtube.
