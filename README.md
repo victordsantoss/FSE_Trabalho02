@@ -46,6 +46,10 @@ Este trabalho foi desenvolvido usando a linguagem [Python](https://www.python.or
 https://user-images.githubusercontent.com/52058094/214090381-f030d424-1d85-4ce7-bc3c-5ec33ddc729c.mov
 
 #### Dashboard com Curva Reflow
+ - Mudança de temperatura referencial de 25 para 38 seguindo os dados do arquivo curva_reflow.
+
+https://user-images.githubusercontent.com/52058094/214095270-94143975-dcf6-4a71-b25a-19737c9f8a5a.mov
+
 
 #### Logs recebidos no Terminal
 
