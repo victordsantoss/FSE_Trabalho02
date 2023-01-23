@@ -18,7 +18,7 @@ def initialMenu():
         Ki = float(input("Digite o valor para Ki: "))
         Kd = float(input("Digite o valor para Kd: "))
         
-    tr_res = float(input("COMO DESEJA OBTER OS VALORES DA TEMPERATURA REFERENCIAL?\nVALOR DEFINIDO PELA UART (1)\nESCOLHER MANUALMENTE (2)\n"))
+    tr_res = float(input("COMO DESEJA OBTER OS VALORES DA TEMPERATURA REFERENCIAL?\nVALOR DEFINIDO PELA UART (1)\nESCOLHER MANUALMENTE (2)\nCURVA REFLOW (3)\n"))
 
     os.system('clear')
     return Kp, Ki, Kd, tr_res
