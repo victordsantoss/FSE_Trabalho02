@@ -28,6 +28,7 @@ comandos = {
     "temperatura_ambiente": b'\x01\x16\xd6\x08\x06\x08\x05',
     "modo_de_temperatura_curva_e_terminal": b'\x01\x16\xd4\x08\x06\x08\x05\x01',
     "modo_de_temperatura_dashboard": b'\x01\x16\xd4\x08\x06\x08\x05\x00',
+    "envia_temp_referencial": b'\x01\x16\xd2\x08\x06\x08\x05',
 }
 
 dashboard = [
@@ -101,16 +102,14 @@ def handleUserCommands(ventoinha_pwm, resistor_pwm, aquecimento, tipo_de_temp, c
     if str(hex(comando_verificado[3])) == dashboard[4]["codigo"]:
         print("RECEBEU COMANDO DE MUDAR O MODO DE TEMPERATURA", comando_verificado)
         if(tipo_de_temp == 0):
-            print("DEVE MUDAR PARA CURVA_REFLOW OU TERMINAL")
             handleCommandAction(comandos["modo_de_temperatura_curva_e_terminal"])
             count_curva_reflow = 0
             tipo_de_temp = 1
-        if(tipo_de_temp == 1):
-            print("DEVE MUDAR PARA DASHBOARD")
+        else:
             handleCommandAction(comandos["modo_de_temperatura_dashboard"])
             count_curva_reflow = 0
             tipo_de_temp = 0
-    
+
     return aquecimento, tipo_de_temp, count_curva_reflow
 
 def handleControlSinal(pid_result):
@@ -120,11 +119,11 @@ def handleControlSinal(pid_result):
     uart.write(aux + crc)
     # handleVerifyCRC16(5,3)
     
-def sendTemp(comando, temp_ambiente):
-    temp_ambiente =  struct.pack("f", temp_ambiente)
-    temp_ambiente_concat = comando + temp_ambiente
-    crc = handleGetCRC16(temp_ambiente_concat, len(temp_ambiente_concat))
-    uart.write(temp_ambiente_concat + crc)
+def sendTemp(comando, temp):
+    temp =  struct.pack("f", temp)
+    temp_concat = comando + temp
+    crc = handleGetCRC16(temp_concat, len(temp_concat))
+    uart.write(temp_concat + crc)
     
 def handleCSVFile(temp_ambiente, temp_interna, temp_referencial, valor_ventoinha, valor_resistor):
     comandos_data = [datetime.datetime.now(), temp_ambiente, temp_interna, temp_referencial, valor_ventoinha, valor_resistor]
@@ -138,10 +137,13 @@ def main():
     resistor_pwm = GPIO.PWM(devices["outputs"][1]["gpio"], 50)
     aquecimento = False
     count_curva_reflow = 0
-    tipo_de_temp = 0
     valor_ventoinha = 0
     valor_resistor = 0
     Kp, Ki, Kd, tr_res = initialMenu()
+    
+    if tr_res == 1: 
+        handleCommandAction(comandos["modo_de_temperatura_dashboard"])
+        tipo_de_temp = 0
     if tr_res == 2: 
         temp_referencial = float(input("Digite o valor para a TEMPERATURA REFERENCIAL: "))
         handleCommandAction(comandos["modo_de_temperatura_curva_e_terminal"])
@@ -179,8 +181,8 @@ def main():
         
         temp_ambiente, pressao_ambiente, humidade_ambiente = handleEnvironmentTemperature()
         sendTemp(comandos["temperatura_ambiente"], temp_ambiente)
-        sendTemp(comandos["temperatura_referencia"], temp_referencial)
-        print ("Contador de interações: ", count_curva_reflow)
+        sendTemp(comandos["envia_temp_referencial"], temp_referencial)
+        print (f"Contador de interações: {count_curva_reflow} Modo de Temperatura: {tipo_de_temp}")
         print ("Temperatura Interna: ", temp_interna)
         print ("Temperatura Referencial: ", temp_referencial)
         print (f"Temperatura Ambiente: {round(temp_ambiente, 2)} Humidade Ambiente: {round(humidade_ambiente, 2)} Pressão Ambiente {round(pressao_ambiente, 2)} ")
