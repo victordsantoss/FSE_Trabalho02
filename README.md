@@ -40,8 +40,6 @@ Este trabalho foi desenvolvido usando a linguagem [Python](https://www.python.or
 - Selecionar o modo de valores para o PID e de tipo de temperatura. 
 
 ## Screenshots 
-#### Dashboard Inicial
-
 #### Dashboard com forno e acionamento ligados
 https://user-images.githubusercontent.com/52058094/214090381-f030d424-1d85-4ce7-bc3c-5ec33ddc729c.mov
 
