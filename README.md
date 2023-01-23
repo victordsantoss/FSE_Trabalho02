@@ -54,6 +54,6 @@ https://user-images.githubusercontent.com/52058094/214097258-e3ce7a11-049d-402f-
 https://user-images.githubusercontent.com/52058094/214097365-93c80656-db8d-42a5-a8da-0a2c1bff746f.mov
 
 ## Vídeo de apresentação
-- Primeira opção: Clique <a href="youtube.com/watch?v=0YSraFGeBVg" target="_blank">aqui</a> para ver no youtube.
+- Primeira opção: Acesse "youtube.com/watch?v=0YSraFGeBVg" para ver no youtube.
 - Segunda opção: Clique [aqui](https://unbbr.sharepoint.com/sites/MinhasGravaes431/_layouts/15/stream.aspx?id=%2Fsites%2FMinhasGravaes431%2FDocumentos%20Compartilhados%2FGeneral%2FRecordings%2FTrabalho%2002%20%2D%20FSE%2D20230123%5F121931%2DMeeting%20Recording%2Emp4) para ver no Sharepoint.
 - Terceira opção: O vídeo está disponível na pasta assets com o nome FSE-Trabalho02.mp4
