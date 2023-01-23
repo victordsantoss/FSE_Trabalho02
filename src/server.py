@@ -9,6 +9,7 @@ from gpioConfig import handleGPIOConfig
 from crc16 import calcula_CRC
 from pid import pid_controle
 from menu import initialMenu
+from sensorBME280 import handleEnvironmentTemperature
 
 uart = serial.Serial("/dev/serial0")
 
@@ -21,7 +22,8 @@ comandos = {
     "atualizar_estado_do_sistema_off": b'\x01\x16\xd3\x08\x06\x08\x05\x00',
     "iniciar_aquecimento": b'\x01\x16\xd5\x08\x06\x08\x05\x01',
     "parar_aquecimento": b'\x01\x16\xd5\x08\x06\x08\x05\x00',
-    "sinal_de_controle": b'\x01\x16\xd1\x08\x06\x08\x05',
+    "sinal_de_controle": b'\x01\x16\xd1\x08\x06\x08\x05', 
+    "temperatura_ambiente": b'\x01\x16\xd6\x08\x06\x08\x05',
 }
 
 dashboard = [
@@ -60,7 +62,6 @@ def handleTemperature(comando_atual):
     uart.write(comando_atual + crc)
     temperatura_verificada = handleVerifyCRC16(9, 7)
     temperatura_tratada = struct.unpack("f",temperatura_verificada[3:-2])
-    print("TEMPERATURA ATUAL: ", temperatura_tratada[0])
     return temperatura_tratada[0]
 
 def handleCommandAction(comando_atual):
@@ -97,6 +98,13 @@ def handleControlSinal(pid_result):
     crc = handleGetCRC16(aux, len(aux))
     uart.write(aux + crc)
     # handleVerifyCRC16(5,3)
+    
+def sendEnviromentTemp(comando, temp_ambiente):
+    temp_ambiente =  struct.pack("f", temp_ambiente)
+    temp_ambiente_concat = comando + temp_ambiente
+    print ("temp_ambiente_concat", temp_ambiente_concat)
+    crc = handleGetCRC16(temp_ambiente_concat, len(temp_ambiente_concat))
+    uart.write(temp_ambiente_concat + crc)
 
 def main():
     devices = handleGPIOConfig()
@@ -108,6 +116,12 @@ def main():
     while 1:   
         temp_interna = handleTemperature(comandos["temperatura_interna"])
         if tr_res == 1: temp_referencial = handleTemperature(comandos["temperatura_referencia"])
+        temp_ambiente, pressao_ambiente, humidade_ambiente = handleEnvironmentTemperature()
+        sendEnviromentTemp(comandos["temperatura_ambiente"], temp_ambiente)
+        print ("Temperatura Interna: ", temp_interna)
+        print ("Temperatura Referencial: ", temp_referencial)
+        print (f"Temperatura Ambiente: {round(temp_ambiente, 2)} Humidade Ambiente: {round(humidade_ambiente, 2)} Pressão Ambiente {round(pressao_ambiente)} ")
+        print("\n")
         aquecimento = handleUserCommands(ventoinha_pwm, resistor_pwm, aquecimento)
         if aquecimento == True:
             print("============================= LIDAR COM AQUECIMENTO =============================")
@@ -119,5 +133,5 @@ def main():
                 ventoinha_pwm.stop()
                 resistor_pwm.start(pid_result)
             handleControlSinal(int(pid_result))
-        time.sleep(1.0)
+        time.sleep(3.0)
 main()
