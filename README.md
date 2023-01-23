@@ -10,7 +10,7 @@ Veja mais detalhes clicando [aqui](https://gitlab.com/fse_fga/trabalhos-2022_2/t
 Este trabalho foi desenvolvido usando a linguagem [Python](https://www.python.org/downloads/) em sua versão 3.
 - Bibliotecas auxiliares:
     - [RPI.GPIO](https://pypi.org/project/RPi.GPIO/): Responsável por permitir acesso a placa.
-    - [SMBUS2](https://pypi.org/project/smbus2/) e [BME280]: Responsáveis para acessar o sensor que retornará a temperatura ambiente.
+    - [SMBUS2](https://pypi.org/project/smbus2/) e [BME280](https://pypi.org/project/bme280/): Responsáveis para acessar o sensor que retornará a temperatura ambiente.
 
 ## Detalhes da implementação
 - O Projeto conta com a implementação de um sistema central que receberá comandos do usuário. 
@@ -45,18 +45,12 @@ https://user-images.githubusercontent.com/52058094/214090381-f030d424-1d85-4ce7-
 
 #### Dashboard com Curva Reflow
  - Mudança de temperatura referencial de 25 para 38 seguindo os dados do arquivo curva_reflow.
-
 https://user-images.githubusercontent.com/52058094/214095270-94143975-dcf6-4a71-b25a-19737c9f8a5a.mov
 
-
 #### Logs recebidos no Terminal
-
-
 https://user-images.githubusercontent.com/52058094/214097258-e3ce7a11-049d-402f-8434-1911f06609db.mov
 
-
 #### Logs recebidos na Live
-
 https://user-images.githubusercontent.com/52058094/214097365-93c80656-db8d-42a5-a8da-0a2c1bff746f.mov
 
 ## Vídeo de apresentação
