@@ -38,6 +38,9 @@ Este trabalho foi desenvolvido usando a linguagem [Python](https://www.python.or
     python3 server.py
 ```
 - Selecionar o modo de valores para o PID e de tipo de temperatura. 
+- Com o código rodando: 
+    - Dashboard:
+        - O usuário deve ligar o **FORNO** e o acionamento dos **ATUADORES** para analisar o gráfico do sinal de controle.
 
 ## Screenshots 
 #### Dashboard com forno e acionamento ligados
