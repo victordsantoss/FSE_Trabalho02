@@ -126,8 +126,10 @@ def sendTemp(comando, temp):
     uart.write(temp_concat + crc)
     
 def handleCSVFile(temp_ambiente, temp_interna, temp_referencial, valor_ventoinha, valor_resistor):
-    comandos_data = [datetime.datetime.now(), temp_ambiente, temp_interna, temp_referencial, valor_ventoinha, valor_resistor]
-    with open('commands.csv', 'a') as f:
+    data_atual = datetime.datetime.now()
+    atual_format = data_atual.strftime("%d/%m/%Y %H:%M:%S")
+    comandos_data = [atual_format, round(temp_ambiente, 2), round(temp_interna, 2), round(temp_referencial, 2), valor_ventoinha, valor_resistor]
+    with open('curva02.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerow(comandos_data)
         
