@@ -43,10 +43,23 @@ Este trabalho foi desenvolvido usando a linguagem [Python](https://www.python.or
 #### Dashboard com forno e acionamento ligados
 https://user-images.githubusercontent.com/52058094/214090381-f030d424-1d85-4ce7-bc3c-5ec33ddc729c.mov
 
+    - Gráfico com temperatura fixa
+
+<img src="./assets/fixa.png">
+
+
 #### Dashboard com Curva Reflow
- - Mudança de temperatura referencial de 25 para 38 seguindo os dados do arquivo curva_reflow.
+    - Mudança de temperatura referencial de 25 para 38 seguindo os dados do arquivo curva_reflow.
  
 https://user-images.githubusercontent.com/52058094/214095270-94143975-dcf6-4a71-b25a-19737c9f8a5a.mov
+
+    - Mudança de temperatura de 25 para 46 seguindo os dados do arquivo curva_reflow. 
+
+<img src="./assets/curva02.png">
+
+    - Mudança de temperatura de 25 para 54 seguindo os dados do arquivo curva_reflow. 
+
+<img src="./assets/curva.png">
 
 #### Logs recebidos no Terminal
 https://user-images.githubusercontent.com/52058094/214097258-e3ce7a11-049d-402f-8434-1911f06609db.mov
